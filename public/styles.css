@@ -1,0 +1,491 @@
+body{
+  background: #161512 linear-gradient(to bottom, hsl(37deg, 12%, 16%), hsl(37deg, 10%, 8%) 116px) no-repeat;
+}
+
+.card-body p{
+  font-size:16px;
+}
+
+/* GLOBAL */
+
+.header-container{
+  display:flex;
+  position: absolute;
+
+  justify-content: center;
+  align-items: center;
+
+  z-index: auto;
+
+  width: 100vw;
+  height: 10vh;
+
+  background: #161512 linear-gradient(to bottom, hsl(37deg, 12%, 16%), hsl(37deg, 10%, 8%) 116px) no-repeat;
+
+
+
+}
+
+.semi-circle{
+  position: absolute;
+  top: -5px;
+  z-index: -1;
+  left: 0%;
+  transform: rotate(180deg);
+  height: 150px;
+  width: 300px;
+  border-radius: 200px 200px 0 0;
+  background-color: white;
+
+
+}
+
+.nav-list{
+  display: flex;
+  gap: 10rem;
+  font-size: 24px;
+
+  /* outline: auto; */
+
+  list-style: none;
+}
+
+.game-container{
+  display: flex;
+  position: absolute;
+
+  top: 10%; 
+  left:17%;
+
+  flex-wrap: wrap;
+  flex-direction: row;
+
+  border-style: none;
+
+  font-size: 0px;
+
+  width: 66vw;
+  height: 90vh;
+
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.game-info-container{
+  position: relative;
+  
+  border-style: none;
+
+  width: 40%;
+  height: 0;
+  padding-bottom: 60%;
+
+}
+
+
+/* FOR PLAY LOCALLY */
+
+#board-container{
+  border-style: none;
+  width: 60%; 
+  height: 0;
+  padding-bottom:60%;
+ 
+}
+
+.scrollable{
+  overflow-y: scroll;
+  height: 200px;
+  background: #f8d0e6;
+  padding: 40px;
+}
+
+.center{
+  margin:auto;
+  width: 50%;
+
+  padding: 10px;
+}
+
+a{
+  color: white;
+  text-decoration: none;
+}
+
+.card{
+  position: absolute;
+  
+  width:100%;
+  height: 100%;
+
+  background: #262421;
+
+  border-radius: 0px;
+}
+
+.card-header{
+  font-size: 3rem;
+  background: #383532;
+}
+
+.card-body{
+  background: #262421;
+}
+
+/* START PAGE */
+
+#matchmaking-table{
+  position: absolute;
+
+  width:50vw;
+  height:25vh;
+
+
+
+  top: 80%;
+  right: 25%;
+}
+
+#game-option-container{
+  display: flex;
+  flex-wrap: wrap;
+  position: absolute;
+
+  justify-content: center;
+
+  width: 50vw;
+  height: 50vh;
+
+  border-style: none;
+
+  top:25%;
+  right:25%;  
+
+}
+
+.btn{
+  display: flex;
+  flex-wrap: wrap;
+
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+
+  border: 2px solid #404040;
+
+  background: #262421;
+
+  width: calc(100% / 4 - 20px);
+  height: 50%;
+    
+}
+
+.btn-font{
+  font-size: calc(0.5vw + 1vw);
+}
+
+.btn p{
+  color:#bababa;
+  font-size: calc(0.5vw + 1vw);
+
+}
+
+.btn:hover{
+  background: rgba(214,79,0,.2);
+  opacity: 1;
+  border: 2px solid #404040;
+}
+
+.btn:hover p{
+  color: #FFFFFF
+}
+
+.wrap-text{
+  display: flex;
+  flex: 1;
+}
+
+.table-secondary{
+  --bs-table-bg: #262421;
+  color: white;
+}
+
+/* BOARD EDITOR */
+
+#board-editor-full-container{
+  display: flex;
+  position: absolute;
+
+  top: 12%; 
+  left:17%;
+
+  flex-wrap: wrap;
+  flex-direction: row;
+
+  border-style: none;
+
+  font-size: 0px;
+
+  width: 66vw;
+  height: 110vh;
+
+  justify-content: center;
+  align-items: center;
+
+
+}
+
+#board-editor-container{
+  position: absolute;
+
+  top: 12%;
+  left: 0%;
+  width: 43%;
+  height: 50%;
+
+  border-style: none;
+
+}
+
+#black-piece-selection-container{
+  display: flex;
+  position: absolute;
+
+  border-style: none;
+
+  top:0%;
+  left: 0%;
+
+  background-color:#bababa;
+
+  border-style: none; 
+  width: 100%;
+  height: 10%;
+
+  gap: 0rem;
+
+  justify-content: center;
+  align-items: center;
+
+
+  border-radius: 10px;
+}
+
+#white-piece-selection-container{
+  position: relative;
+  display: flex;
+
+  bottom: 35%;
+  left:0%;
+
+  background-color:  #bababa;
+
+  justify-content: center;
+  align-items: center;
+
+  height: 10%;
+
+  gap:0rem;
+
+  border-radius: 5px;
+
+}
+
+.img-size img {
+  position:relative;
+  float:right;
+
+  /* right:5%; */
+  top: 5%;
+
+
+
+  border-style: none;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.selection-square{
+  width: 80%;
+  height: 80%;
+}
+
+.selection-square:hover{
+  width: 100%;
+  height: 100%
+}
+
+#FEN-container{
+  color: white;
+}
+
+#checkbox-FEN-info{
+  display: flex;
+  position:absolute;
+
+  border-radius: 10px;
+
+  left: 65%;
+  top:25%;
+
+  flex-direction: column;
+
+  background-color: #28282B;
+
+  justify-content: space-between;
+
+  width:30%;
+  height: 20%; 
+  min-width: 10rem;
+
+}
+
+.form-check{
+  position: relative;
+  left:5%;
+  font-size: 1rem;  
+}
+
+.form-check-label{
+  color: #FFFFFF;
+}
+
+#white-castling-boxes{
+  display: flex;
+  position: absolute;
+
+  top: 30%;
+  left:10%;
+
+  flex-direction: column;
+  justify-content: space-between;
+
+}
+
+#black-castling-boxes{
+  display:flex;
+  position: absolute;
+
+  top:30%;
+  left: 67%;
+
+  flex-direction: column;
+
+  justify-content: space-between;
+
+
+}
+
+#white-to-move-container{
+  position: absolute;
+  width: 80%;
+  left: 10%;
+
+  border-style: none;
+
+
+  bottom: 10%;
+}
+
+.scroll{
+  overflow-x: scroll;
+  white-space: nowrap;
+
+  background-color: #28282B;
+  border-radius: 5px;
+}
+
+#FEN-text{
+  color:#FFFFFF;
+}
+
+
+#FEN-form{
+  position: absolute;
+
+  left:100px;
+}
+
+/* ONLINE GAME */
+
+#online-board-container{
+  position: absolute;
+  top: 40px;
+  border-style: none;
+  width: 60%;
+  height: 0;
+  padding-bottom: 60%;
+}
+
+.game-moves-container {
+  width: 100%;
+  height: 100%;
+}
+
+td.gridjs-td {
+  font-family: "Noto Sans", Sans-Serif;
+  font-size: 1vw;
+  color: white;
+
+  background-color: #262421;
+}
+
+td.gridjs-td:first-child {
+  font-family: "Noto Sans", Sans-Serif;
+  width: 3%;
+  font-size: 1vw;
+  color: white;
+
+  background-color: #404040;
+}
+
+td.gridjs-td:first-child:hover {
+  background-color: #404040;
+}
+
+td.gridjs-td:hover {
+  background-color: #8f8b8b;
+}
+
+th.gridjs-th {
+  font-family: "Noto Sans", Sans-Serif;
+  font-size: 1vw;
+  color: white;
+  background-color: #262421;
+}
+
+.gridjs.gridjs-container {
+  width: 100%;
+  height: 100%;
+}
+
+.timer {
+  background: #161512 linear-gradient(to bottom, hsl(37deg, 12%, 16%), hsl(37deg, 10%, 8%) 116px) no-repeat;
+  color: #bababa;
+  direction: ltr;
+  text-align: center;
+  border: 3px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.timer-container {
+  height: 100%;
+}
+
+.timer-content {
+  color: white;
+  font-size: 1.5rem;
+  overflow: hidden;
+  padding: 0.1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#rematch-btn:hover{
+  background-color: #8f8b8b;
+}
+
+#home-screen-btn:hover{
+  background-color: #8f8b8b;
+}

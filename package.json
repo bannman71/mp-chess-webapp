@@ -1,0 +1,27 @@
+{
+  "name": "multiplayer-chess-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.mjs"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "jquery": "^3.6.1",
+    "socket.io": "^4.5.4",
+    "socket.io-client": "^4.5.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bannman71/multiplayer-chess-webapp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bannman71/multiplayer-chess-webapp/issues"
+  },
+  "homepage": "https://github.com/bannman71/multiplayer-chess-webapp#readme"
+}

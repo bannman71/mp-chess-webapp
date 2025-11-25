@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<head>
+
+    <script language="javascript" type="text/javascript" src="https://cdn.jsdelivr.net/npm/p5@1.4.1/lib/p5.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="jquery.min.js"></script> 
+    <link rel="stylesheet" href="styles.css" />
+    <script language="javascript" type="module" src="front.mjs"></script>
+    <script language="javascript" type="module" src="board.mjs"></script> 
+    <script language="javascript" type="module" src="boardEditor.js"><reference path="./p5.global-mode.d.ts" /></script>
+   
+
+
+</head>
+
+<body>
+
+  <div class="header-container">
+    <ul class="nav-list">
+      <li><a href="/">Home</a></li> 
+      <li><a href="/PlayLocally">Play Locally</a></li>
+      <li><a href="/BoardEditor">Board Editor</a></li>
+    </ul>
+  </div>
+
+  <div id="board-editor-full-container">
+
+    <div id="black-piece-selection-container">
+     
+      <div class="selection-square">
+        <div id="b-rook-square">
+          <div class="img-size">
+            <div id="black-rook">
+              <img src="./classic_hq/b_rook.png"/>
+            </div>  
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="b-knight-square">
+          <div class="img-size">
+            <div id="black-knight">
+              <img src="./classic_hq/b_knight.png"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="selection-square">
+        <div id="b-bishop-square">
+          <div class="img-size">
+            <div id="black-bishop">
+              <img src="./classic_hq/b_bishop.png"/>
+            </div> 
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="b-queen-square">
+          <div class="img-size">
+            <div id="black-queen">
+            <img src="./classic_hq/b_queen.png"/> 
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="b-king-square">
+          <div class="img-size">
+            <div id="black-king">
+            <img src="./classic_hq/b_king.png"/> 
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="b-pawn-square">
+          <div class="img-size">
+            <div id="black-pawn">
+            <img src="./classic_hq/b_pawn.png"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="img-size">
+        <img src="./classic_hq/"/>
+      </div>
+
+      <div class="img-size">
+        <img src="./classic_hq/"/> 
+      </div> -->
+
+    </div>
+
+    <div id="board-editor-container"></div>
+
+    
+    <div id="checkbox-FEN-info">
+
+
+      <h4 style="color:white; position:absolute; left:35%; top:12%">Options</h4>
+      
+      <div id="white-castling-boxes">
+
+        <h4 style="color:white">White</h4>
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="white-castling-long" name="option1" value="something" checked>
+          <label class="form-check-label">O-O-O</label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="white-castling-short" name="option1" value="something" checked>
+          <label class="form-check-label">O-O</label>
+        </div>
+      </div>
+
+      <div id="black-castling-boxes">
+
+        <h4 style="color:white">Black</h4>
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="black-castling-long" name="option1" value="something" checked>
+          <label class="form-check-label">O-O-O</label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="black-castling-short" name="option1" value="something" checked>
+          <label class="form-check-label">O-O</label>
+        </div>
+      </div>
+
+      <div id="white-to-move-container">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="white-to-move" name="option1" value="something" checked style="position: absolute; right: 15%; top: 15%">
+          <label class="form-check-label" style="font-size: calc(1rem * 1.25);">White to move</label>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="white-piece-selection-container">
+
+      <div class="selection-square">
+        <div id="w-rook-square">
+          <div class="img-size">
+            <div id="white-rook">
+              <img src="./classic_hq/w_rook.png"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="w-knight-square">
+          <div class="img-size">
+            <div id="white-knight">
+              <img src="./classic_hq/w_knight.png"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="w-bishop-square">
+          <div class="img-size">
+            <div id="white-bishop">
+              <img src="./classic_hq/w_bishop.png"/>
+            </div> 
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="w-queen-square">
+          <div class="img-size">
+            <div id="white-queen">
+            <img src="./classic_hq/w_queen.png"/> 
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="w-king-square">
+          <div class="img-size">
+            <div id="white-king">
+            <img src="./classic_hq/w_king.png"/> 
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="selection-square">
+        <div id="w-pawn-square">
+          <div class="img-size">
+            <div id="white-pawn">
+            <img src="./classic_hq/w_pawn.png"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="img-size">
+        <img src="./classic_hq/"/>
+      </div>
+
+      <div class="img-size">
+        <img src="./classic_hq/"/> 
+      </div> -->
+    </div>
+
+    <div id="FEN-form">
+      <h4 id='FEN-text'>FEN</h4>
+      <div class="scroll">
+        <h5 id="FEN-container"></h5> 
+      </div>
+    </div>
+
+   
+  </div>
+
+  <script>
+   
+  </script>
+</body>
+</html>
