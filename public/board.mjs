@@ -713,11 +713,11 @@ export default class Board {
         let colourCalc = 16; //if black
         if (findAttacksFromWhite) colourCalc = 8 //if white
 
-
+        //search through the pieces on the board
         for (var i = 0; i < 8; i++){
             for (var j = 0; j < 8; j++){
-                if (position[i][j] !== 0 && ((position[i][j].colour & colourCalc) === colourCalc)){ //if the piece is from the side you want to find attacks from 
-
+                //if there is a piece on the square and the piece is from the side you want to find attacks from
+                if (position[i][j] !== 0 && ((position[i][j].colour & colourCalc) === colourCalc)){
                     switch (position[i][j].type){
                         case PieceType.knight: case PieceType.king: case PieceType.pawn:
                             for (let options of position[i][j].intervals()){
@@ -729,7 +729,9 @@ export default class Board {
                                         bitmap[row_temp][col_temp] = 1;
                                     }
                                     else{
-                                        if (position[row_temp][col_temp].type === PieceType.king && (position[row_temp][col_temp].colour & colourCalc) === 0) { //if its the king then still choose that square
+                                        //if its the king then still choose that square
+                                        //so that a knight can put a king in check
+                                        if (position[row_temp][col_temp].type === PieceType.king && (position[row_temp][col_temp].colour & colourCalc) === 0) {
                                             bitmap[row_temp][col_temp] = 1;
                                         }
                                     }
@@ -738,7 +740,7 @@ export default class Board {
                             break;
                         default:
                             //we are iterating through all the squares on the board
-                            //position[i][j] will be a piece object, we can find its intervals from the getter
+                            //position[i][j] will be a piece object, we can find its intervals from the array
                             for (let options of position[i][j].intervals()){
                                 var col_temp = j + options.dx;
                                 var row_temp = i + options.dy;
@@ -803,7 +805,8 @@ export default class Board {
 
         newPosition[piece.row][piece.col] = 0;
         newPosition[destRow][destCol] = piece;
-    
+
+        //find the king in this loop
         for (let i = 0; i < 8; i++){
             for (let j = 0; j < 8; j++){
                 if (newPosition[i][j] !== 0){
@@ -863,16 +866,24 @@ export default class Board {
 
 export class PieceType{
 
+    //colourless types
     static type = {
         'k': 1, 'p' : 2, 'n' : 3, 'b': 4, 'r': 5, 'q': 6,
         'K': 1, 'P' : 2, 'N' : 3, 'B': 4, 'R': 5, 'Q': 6 
     }
+    //number for a piece with colour
+    //capital is white, lowercase is black
+    //white(8) + pawn(2) = 10 (P)
+    //black(16) + rook(5) = 21 (r)
     static numToType = {
         9: 'K', 10: 'P', 11: 'N', 12: 'B', 13: 'R', 14: 'Q',
         17: 'k', 18: 'p', 19: 'n', 20: 'b', 21: 'r', 22: 'q'
     }
 
-    static numToPGNType = { //accounts for the case where a pawn is moved in PGN notation
+    //all the same as numToType
+    //pawn is shown as empty in PGN
+    //e.g. e4, instead of Pe4
+    static numToPGNType = {
         9: 'K', 10: '', 11: 'N', 12: 'B', 13: 'R', 14: 'Q',
         17: 'K', 18: '', 19: 'N', 20: 'B', 21: 'R', 22: 'Q'
     }

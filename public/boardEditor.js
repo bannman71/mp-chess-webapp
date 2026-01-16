@@ -22,6 +22,7 @@ new p5(function(p5){
     var board;
     var front;
 
+    //assigned on mouse release
     var selectedPiece;
 
     var getClickedSquare;
@@ -45,7 +46,7 @@ new p5(function(p5){
         'width': '100%'
     }
 
-    const pieces = ['pawn', 'king', 'knight', 'bishop', 'rook', 'queen'];
+    const STR_OPTIONS = ['pawn', 'king', 'knight', 'bishop', 'rook', 'queen', 'x-button'];
 
     const BIN_PIECES = {20: 'b_bishop', 17: 'b_king', 19: 'b_knight', 18: 'b_pawn', 22: 'b_queen', 21: 'b_rook',
     12: 'w_bishop', 9: 'w_king', 11: 'w_knight', 10: 'w_pawn', 14: 'w_queen', 13: 'w_rook'}
@@ -68,6 +69,41 @@ new p5(function(p5){
 
         $('#white-piece-selection-container').css(whiteSelectionContainerCSS);
         $('#FEN-form').css(FENFormCSS);
+    }
+
+    function updatePieceSelectionUI(){
+
+        for (var opt of STR_OPTIONS) {
+            let whiteOptToSelect = '#w-' + opt + '-square';
+            let blackOptToSelect = '#b-' + opt + '-square';
+
+            //reset to default style
+            $(whiteOptToSelect).css(DEFSTYLE);
+            $(blackOptToSelect).css(DEFSTYLE);
+        }
+
+        if (selectedPiece === 100) {
+            $("#w-x-button-square").css(SELECTEDSTYLE);
+            console.log("white square")
+            return;
+        }
+        else if (selectedPiece === 200) {
+            console.log("black square")
+            $("#b-x-button-square").css(SELECTEDSTYLE);
+            return;
+        }
+
+        var colour;
+        if ((selectedPiece & 24) === PieceType.black) colour = 'b';
+        else colour = 'w';
+
+        var piece = PieceType.numToPieceName[selectedPiece & 7];
+
+        //e.g. b-pawn-square
+        var cssPiece = '#' + colour + '-' + piece + "-square";
+        console.log(cssPiece);
+        $(cssPiece).css(SELECTEDSTYLE);
+
     }
 
     p5.setup = () => {
@@ -110,26 +146,7 @@ new p5(function(p5){
         front.drawAllPieces(true, board.occSquares, pieceAtMouse);
 
 
-        let whitePieceToSelect;
-        let blackPieceToSelect;
-        //highlights the piece that has been selected to place on the board
-        for (var piece of pieces){
-            whitePieceToSelect = '#w-' + piece + '-square';
-            blackPieceToSelect = '#b-' + piece + '-square'; 
 
-            $(whitePieceToSelect).css(DEFSTYLE);
-            $(blackPieceToSelect).css(DEFSTYLE);
-
-            if ((selectedPiece & 24) === PieceType.black){
-                if (PieceType.numToPieceName[selectedPiece & 7] === piece){
-                    $(blackPieceToSelect).css(SELECTEDSTYLE);
-                }
-            }else {
-                if (PieceType.numToPieceName[selectedPiece & 7] === piece){
-                    $(whitePieceToSelect).css(SELECTEDSTYLE);
-                }
-            }
-        }
 
 
         if (!($('#FEN-container').is(':hover'))){
@@ -159,55 +176,73 @@ new p5(function(p5){
 
         $("#black-rook").off('click').on("click", function() {
             selectedPiece = PieceType.rook ^ PieceType.black;
+            updatePieceSelectionUI()
         });
 
         $("#black-knight").off('click').on("click", function() {
-            selectedPiece = PieceType.knight ^ PieceType.black; 
+            selectedPiece = PieceType.knight ^ PieceType.black;
+            updatePieceSelectionUI()
         });
 
         $("#black-bishop").off('click').on("click",function() {
             selectedPiece = PieceType.bishop ^ PieceType.black;
+            updatePieceSelectionUI()
         });
 
         $("#black-queen").off('click').on("click",function() {
             selectedPiece = PieceType.queen ^ PieceType.black;
+            updatePieceSelectionUI()
         });
 
         $("#black-king").off('click').on("click",function() {
             selectedPiece = PieceType.king ^ PieceType.black;
+            updatePieceSelectionUI()
         });
 
         $("#black-pawn").off('click').on("click",function() {
             selectedPiece = PieceType.pawn ^ PieceType.black;
+            updatePieceSelectionUI()
         });
 
         $("#white-rook").off('click').on("click",function() {
             selectedPiece = PieceType.rook ^ PieceType.white;
+            updatePieceSelectionUI()
         });
 
         $("#white-knight").off('click').on("click",function() {
-
             selectedPiece = PieceType.knight ^ PieceType.white;
+            updatePieceSelectionUI()
         });
 
         $("#white-bishop").off('click').on("click",function() {
             selectedPiece = PieceType.bishop ^ PieceType.white;
+            updatePieceSelectionUI()
         });
 
         $("#white-queen").off('click').on("click",function() {
             selectedPiece = PieceType.queen ^ PieceType.white;
+            updatePieceSelectionUI()
         });
 
         $("#white-king").off('click').on("click",function() {
             selectedPiece = PieceType.king ^ PieceType.white;
+            updatePieceSelectionUI()
         });
 
         $("#white-pawn").off('click').on("click",function() {
             selectedPiece = PieceType.pawn ^ PieceType.white;
+            updatePieceSelectionUI()
         });
 
-    
+        $("#w-x-button").off('click').on("click",function() {
+            selectedPiece = 100
+            updatePieceSelectionUI()
+        });
 
+        $("#b-x-button").off('click').on("click",function() {
+            selectedPiece = 200
+            updatePieceSelectionUI()
+        });
     }
 
     p5.mousePressed = () => {
@@ -216,8 +251,6 @@ new p5(function(p5){
         if (board.isOnBoard(getClickedSquare.y,getClickedSquare.x)){
             board.occSquares[getClickedSquare.y][getClickedSquare.x] = new Piece((selectedPiece & 7), getClickedSquare.y,getClickedSquare.x, (selectedPiece & 24));
         }
-
-
     }
 
 
