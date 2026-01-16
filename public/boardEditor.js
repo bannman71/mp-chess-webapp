@@ -23,7 +23,9 @@ new p5(function(p5){
     var front;
 
     //assigned on mouse release
-    var selectedPiece;
+    //selectedPiece & 7 is the pieceType
+    //selectedPiece & 24 is it's colour
+    var selectedPiece = 0;
 
     var getClickedSquare;
     var pieceAtMouse;
@@ -84,11 +86,9 @@ new p5(function(p5){
 
         if (selectedPiece === 100) {
             $("#w-x-button-square").css(SELECTEDSTYLE);
-            console.log("white square")
             return;
         }
         else if (selectedPiece === 200) {
-            console.log("black square")
             $("#b-x-button-square").css(SELECTEDSTYLE);
             return;
         }
@@ -101,7 +101,6 @@ new p5(function(p5){
 
         //e.g. b-pawn-square
         var cssPiece = '#' + colour + '-' + piece + "-square";
-        console.log(cssPiece);
         $(cssPiece).css(SELECTEDSTYLE);
 
     }
@@ -144,10 +143,6 @@ new p5(function(p5){
         p5.background(front.white);
         front.drawGrid();
         front.drawAllPieces(true, board.occSquares, pieceAtMouse);
-
-
-
-
 
         if (!($('#FEN-container').is(':hover'))){
             endOfFen = '';
@@ -246,20 +241,32 @@ new p5(function(p5){
     }
 
     p5.mousePressed = () => {
-        getClickedSquare = front.getMouseCoord(true, p5.mouseX,p5.mouseY);
+        if (selectedPiece === 0) return;
 
-        if (board.isOnBoard(getClickedSquare.y,getClickedSquare.x)){
-            board.occSquares[getClickedSquare.y][getClickedSquare.x] = new Piece((selectedPiece & 7), getClickedSquare.y,getClickedSquare.x, (selectedPiece & 24));
+        getClickedSquare = front.getMouseCoord(true, p5.mouseX, p5.mouseY);
+
+        if (board.isOnBoard(getClickedSquare.y, getClickedSquare.x)) {
+            //if the x-button is selected
+            if (selectedPiece % 100 === 0) {
+                board.occSquares[getClickedSquare.y][getClickedSquare.x] = 0;
+            }else {
+                board.occSquares[getClickedSquare.y][getClickedSquare.x] = new Piece((selectedPiece & 7), getClickedSquare.y, getClickedSquare.x, (selectedPiece & 24));
+            }
         }
     }
 
 
     p5.mouseDragged = () => {
+        if (selectedPiece === 0) return;
 
         getClickedSquare = front.getMouseCoord(true, p5.mouseX,p5.mouseY);
 
         if (board.isOnBoard(getClickedSquare.y,getClickedSquare.x)){
-            board.occSquares[getClickedSquare.y][getClickedSquare.x] = new Piece((selectedPiece & 7), getClickedSquare.y,getClickedSquare.x, (selectedPiece & 24));
+             if (selectedPiece % 100 === 0) {
+                board.occSquares[getClickedSquare.y][getClickedSquare.x] = 0;
+            }else {
+                board.occSquares[getClickedSquare.y][getClickedSquare.x] = new Piece((selectedPiece & 7), getClickedSquare.y, getClickedSquare.x, (selectedPiece & 24));
+            }
         }
 
     }
