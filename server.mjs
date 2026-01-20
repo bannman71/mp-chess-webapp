@@ -23,8 +23,9 @@ import {Piece} from './public/board.mjs';
 import { instantiateNewBoard } from './public/board.mjs';
 import GameRoom from './public/gameRoom.mjs';
 import PGN from './public/PGN.mjs';
-//
 
+
+//matchmaking ID (socketID), time, and increment are assigned in chooseTimeControl()
 var matchmaking = [];
 var gameRooms = [];
 var rematchWaitingRoom = [];
@@ -108,7 +109,7 @@ io.on('connection', (socket) => {
     //searches for a game and creates one if possible
     for (let i = 0; i < matchmaking.length; i++){
       for (let j = i + 1; j < matchmaking.length; j++){
-        //if game found
+        //if there are 2 games with same time and increment (game found)
         if ((matchmaking[i].time === matchmaking[j].time) && (matchmaking[i].increment === matchmaking[j].increment)){
           //moves matched players to game room
          
@@ -117,22 +118,28 @@ io.on('connection', (socket) => {
           let colour1 = getRandomInt(0,1);
           let colour2 = Math.abs(colour1 - 1);
 
+          //go through available clients in waiting room
           for (let clientID of clients){
             const clientSocket = io.sockets.sockets.get(clientID);
-            
+
+            //if we find a client
             if (clientID === matchmaking[i].id){
+              //assign them a colour and redirect them to a game page
               let data = {client: matchmaking[i], page: '/onlineGame', "roomCode": roomCode, 
               isWhite: colour1}; 
               clientSocket.emit('redirect', (data)); 
             }
             else if(clientID === matchmaking[j].id){
+              //this client will be assigned a different colour
               let data = {client: matchmaking[j], page: '/onlineGame', "roomCode": roomCode, 
               isWhite: colour2};
               clientSocket.emit('redirect', (data));
             }
           }
 
+          //if the room doesn't exist
           if (!gameRooms[roomCode]){
+            //make one
             let board = new Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 1, true, true, true, true, true)
             let pgn = new PGN();
             gameRooms[roomCode] = new GameRoom(
@@ -148,10 +155,13 @@ io.on('connection', (socket) => {
 
           break;
         }
+
+      //stop searching
       if (gameFound) break;
       }
     }
-    
+
+    //remove them from the home screen table
     updateTableHTML();
 
   });
@@ -175,7 +185,6 @@ io.on('connection', (socket) => {
 
   socket.on('moveAttempted', function(data) {
     let isLegal = false;
-    
 
     let newGridData = data.gridData;
 
@@ -191,6 +200,7 @@ io.on('connection', (socket) => {
     whiteTimer = new ServerTimer(data.wTime.time / 60, data.wTime.increment / 1);
     blackTimer = new ServerTimer(data.bTime.time / 60, data.bTime.increment / 1);
 
+    //check if a legal move has been made
     if (piece.type === PieceType.king) {
       if (board.checkNextMoveBitmap(piece, data.fCoordsY, data.fCoordsX) === true) { //king moves need the bitmap before due to castling through a check
         if (board.isLegalKingMove(piece, data.fCoordsY, data.fCoordsX)) isLegal = true;
@@ -202,30 +212,26 @@ io.on('connection', (socket) => {
     }
 
     if (isLegal){
-
+      //used only for the sound
       let captures = board.occSquares[data.fCoordsY][data.fCoordsX] !== 0;
 
       let target = {"row": data.fCoordsY, "col": data.fCoordsX};
-      let pieceMovedNtn = board.pieceMovedNotation(piece, target);
 
-      if (piece.type !== PieceType.pawn) board.pawnMovedTwoSquares = false;
+      //used for the grid
+      let pieceMovedNtn = board.pieceMovedNotation(piece, target);
 
       if (piece.colour === PieceType.black) {
         board.moveCounter++; //after blacks move -> the move counter always increases
       }
 
-      if (board.enPassentTaken){
-        board.updateEnPassentMove(piece, data.fCoordsY, data.fCoordsX);
-        board.enPassentTaken = false;
-      } else board.updatePiecePos(piece, data.fCoordsY, data.fCoordsX);
+      //Update position of occSquares and piece objects
+      board.updatePiecePos(piece, data.fCoordsY, data.fCoordsX);
 
       //create a new bitmap for the current legal position for board.kingInCheck()
       let bmap = board.findMaskSquares(board.whiteToMove, board.occSquares);
       board.maskBitMap(bmap);
 
-      board.isInCheck = board.kingInCheck();
-
-      if (board.isInCheck) pieceMovedNtn += '+';
+      if (board.kingInCheck()) pieceMovedNtn += '+';
 
       if (board.whiteToMove) {
         whiteTimer.update(data.timeTaken);

@@ -253,15 +253,15 @@ export default class Board {
         }
            
         switch (piece.type) {
-            case PieceType.rook: 
-                if (this.legalSquares(piece).includes(destPos)){
+            case PieceType.rook:
+                if (this.allPiecesLegalSquares(piece).includes(destPos)){
                     if (piece.col === 7) this.removeCastlingRights(true, false);
                     else if (piece.col === 0) this.removeCastlingRights(false, true)
                     return true;
                 }
                 break;
-            case PieceType.bishop: case PieceType.queen: 
-                if (this.legalSquares(piece).includes(destPos)){
+            case PieceType.bishop: case PieceType.queen:
+                if (this.allPiecesLegalSquares(piece).includes(destPos)){
                     return true;
                 }
                 break;
@@ -274,8 +274,7 @@ export default class Board {
                 break;
         }
 
-        //pawns have special cases so put them seperately 
-
+        //pawns have special cases so put them separately
         if (piece.colourAndPiece() === (PieceType.pawn ^ PieceType.white)){
             if (piece.col === destCol){
                 if (piece.row === 6){  // if white pawn on starting square
@@ -299,9 +298,12 @@ export default class Board {
                         }
                     }
                 }
-            }else if ((piece.row - destRow === 1) && (piece.col - destCol === 1 || piece.col - destCol === -1)){ //diagonal capture
-                if ((this.occSquares[destRow][destCol] !== 0) && (piece.isOppositeColour(this.occSquares,destRow,destCol))) return true;
-                //en passent case
+            }else if ((piece.row - destRow === 1) && (piece.col - destCol === 1 || piece.col - destCol === -1)){ //diagonal capture cases
+                //regular diagonal capture
+                if ((this.occSquares[destRow][destCol] !== 0) && (piece.isOppositeColour(this.occSquares,destRow,destCol))) {
+                    return true;
+                }
+                //en passent capture
                 else if ((this.pawnMovedTwoSquares === true) && (piece.row === 3) && (destCol === this.pawnMovedTwoSquaresCol)){
                     this.enPassentTaken = true;
                     return true;
@@ -327,18 +329,21 @@ export default class Board {
                 else{
                     if (destRow - piece.row === 1){
                         if (this.occSquares[destRow][destCol] === PieceType.none){
-                           
                             return true;
                         }
                     }
                 }
             }
-            //diagonal capture
-            else if ((destRow - piece.row === 1) && (piece.col - destCol === 1 || piece.col - destCol === -1)){ 
-                if ((this.occSquares[destRow][destCol] !== 0) && ((this.occSquares[destRow][destCol].colour & piece.colour) === 0) ) return true;
+            //diagonal capture cases
+            else if ((destRow - piece.row === 1) && (piece.col - destCol === 1 || piece.col - destCol === -1)){
+                //regular diagonal capture
+                if ((this.occSquares[destRow][destCol] !== 0) && ((this.occSquares[destRow][destCol].colour & piece.colour) === 0) ) {
+                    return true;
+                }
+                //en passent case
                 else if ((this.pawnMovedTwoSquares === true) && (piece.row === 4) && (destCol === this.pawnMovedTwoSquaresCol)){
                     this.enPassentTaken = true;
-                    return true; //en passent
+                    return true;
                 }
             }
         }  
@@ -383,15 +388,27 @@ export default class Board {
             this.removeCastlingRights(true,true);
             this.shortCastles = false; //reset it to false as you are no longer castling
         }
-        else if(this.longCastles){
+        else if (this.longCastles) {
             this.longCastlePiece(piece);
-            this.removeCastlingRights(true,true);
+            this.removeCastlingRights(true, true);
             this.longCastles = false; //reset to false as you are not castling anymore
-        }else {
+        }
+        else if (this.enPassentTaken){
+                //delete the captured piece
+                this.occSquares[piece.row][this.pawnMovedTwoSquaresCol] = 0;
+                //delete the square the pawn just came from
+                this.occSquares[piece.row][piece.col] = 0;
+                //update new square
+                this.occSquares[newRow][newCol] = piece;
+
+                piece.updateSquare(newRow, newCol);
+                this.enPassentTaken = false;
+        }else {//a regular move happens
             this.occSquares[piece.row][piece.col] = 0;
             this.occSquares[newRow][newCol] = piece;
             piece.updateSquare(newRow,newCol);
         }
+
     }
 
     updateEnPassentMove(piece,destRow,destCol){
@@ -431,31 +448,6 @@ export default class Board {
         this.occSquares[king.row][2] = king; //changes king position on occsquares
 
         king.updateSquare(king.row, 2); //change king object position
-    }
-
-    legalSquares(piece){ //gets all available squares for piece passed in
-        var legalCoords = [];
-
-        for (let options of piece.intervals()){
-            var col_temp = piece.col + options.dx;
-            var row_temp = piece.row + options.dy;
-
-
-            while(this.isOnBoard(row_temp,col_temp)){ //while hasn't gone outside of the array
-                if (this.occSquares[row_temp][col_temp] === 0){
-                    legalCoords.push(row_temp + '' + col_temp);
-                }
-                else{
-                    if ((this.occSquares[row_temp][col_temp].colour & piece.colour) === 0){ // opposite colours
-                        legalCoords.push(row_temp + '' + col_temp);
-                    }
-                    break;
-                } 
-                col_temp += options.dx;
-                row_temp += options.dy;
-            }
-        }
-        return legalCoords;
     }
 
     //choose a square and piece, this will calculate which squares will be attacked if the chosen piece
@@ -498,7 +490,6 @@ export default class Board {
     }
 
     //finds the legal move of any piece you pass in, and put the available squares into an array
-
     allPiecesLegalSquares(piece){
         let arr = [];
 
@@ -604,7 +595,7 @@ export default class Board {
                     }
                 }
                 break;
-            default:
+            default://Queen, Rook, Bishop
                 for (let options of piece.intervals()){
                     var col_temp =  piece.col + options.dx;
                     var row_temp = piece.row + options.dy;
@@ -697,7 +688,9 @@ export default class Board {
         let colourCalc = 16; //if black
         if (findAttacksFromWhite) colourCalc = 8 //if white
 
-        //search through the pieces on the board
+        //we are iterating through all the squares on the board
+        //position[i][j] will be a piece object, we can find its intervals from
+        //the piece.intervals array
         for (var i = 0; i < 8; i++){
             for (var j = 0; j < 8; j++){
                 //if there is a piece on the square and the piece is from the side you want to find attacks from
@@ -723,8 +716,7 @@ export default class Board {
                             }
                             break;
                         default:
-                            //we are iterating through all the squares on the board
-                            //position[i][j] will be a piece object, we can find its intervals from the array
+
                             for (let options of position[i][j].intervals()){
                                 var col_temp = j + options.dx;
                                 var row_temp = i + options.dy;
@@ -776,7 +768,8 @@ export default class Board {
         }
     }
 
-    checkNextMoveBitmap(piece, destRow, destCol){ //finds your king and makes sure you don't make a move that puts yourself into check
+    //finds your king and makes sure you don't make a move that puts yourself into check
+    checkNextMoveBitmap(piece, destRow, destCol){
         let outOfCheck = true;
         let kingRow,kingCol;
         let bitmap;

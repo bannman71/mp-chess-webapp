@@ -78,8 +78,6 @@ new p5(function (p5) {
 
     let lostGame = false;
 
-    let tempPawnMovedTwoSquares;
-
     //SERVER SIDE LOGIC
 
     socket.on('legalMoveMade', (data) => { // is called when the opponent makes a legal move
@@ -99,7 +97,6 @@ new p5(function (p5) {
         //during the other player's move.
         if (windowInactive) {
             timeInactiveStart = Date.now();
-           // console.log(Date.now());
         }
 
         gridData = data.newGridData;
@@ -113,7 +110,6 @@ new p5(function (p5) {
         } else moveSound.play(); //otherwise make the move sound
 
         //calculates if stalemate or checkmate has happened
-        //console.log(board.maskMap);
         let numLegalMoves = board.calculateNumLegalMoves();
         if (numLegalMoves == 0 && !board.isInCheck) socket.emit('stalemate', roomCode);
         let mateData = {
@@ -140,7 +136,7 @@ new p5(function (p5) {
                 openPopup();
             }
         }else {
-            if (data.whiteLoses){ //if black and white loses
+            if (data.whiteLoses){ //if black, and white loses
                 document.getElementById("popup").style.backgroundColor = "#85a94e";
                 popupContent.innerHTML = data.winningScreen;
                 openPopup();
@@ -481,6 +477,7 @@ new p5(function (p5) {
         board.shortCastles = false;
         board.longCastles = false;
         let legalSideAttemptedMove = false;
+        let tempPawnMovedTwoSquares;
         let isLegal = false;
 
         if (clientIsWhite === (pieceAtMouse.colour === PieceType.white)) legalSideAttemptedMove = true;
@@ -488,7 +485,7 @@ new p5(function (p5) {
         let destCoords = front.getMouseCoord(clientIsWhite, p5.mouseX, p5.mouseY); // returns coord for array
 
         if (board.isOnBoard(destCoords.y, destCoords.x) && pieceAtMouse && legalSideAttemptedMove) {
-
+            tempPawnMovedTwoSquares = board.pawnMovedTwoSquares;
             if (pieceAtMouse.type === PieceType.king) {
                 //king moves need the bitmap before due to castling through a check
                 if (board.checkNextMoveBitmap(pieceAtMouse, destCoords.y, destCoords.x) === true) {
@@ -499,13 +496,17 @@ new p5(function (p5) {
             } else {
                 if (board.isLegalMove(pieceAtMouse, destCoords.y, destCoords.x)) {
                     //doesn't need the bitmap first as it can find after a move has been made whether or not it is in check
-                    if (board.checkNextMoveBitmap(pieceAtMouse, destCoords.y, destCoords.x) === true) isLegal = true;
+                    if (board.checkNextMoveBitmap(pieceAtMouse, destCoords.y, destCoords.x) === true) {
+                        isLegal = true;
+                    }
                 }
             }
         }
 
         if (isLegal) {
+
             let timeTaken = 0;
+            //only run timer after both sides have made a move
             if (board.moveCounter > 1) {
                 timeMoveEnd = Date.now();
                 timeTaken = (timeMoveEnd - timeMoveStart) / 1000;
@@ -530,21 +531,17 @@ new p5(function (p5) {
                 };
 
             socket.emit('moveAttempted', data);
-            if (board.enPassentTaken) {
-                board.updateEnPassentMove(pieceAtMouse, destCoords.y, destCoords.x);
-                board.enPassentTaken = false;
+
+            if (tempPawnMovedTwoSquares === true){
+                board.pawnMovedTwoSquares = false;
             }
-            else {
-                //if they didn't castle -> call the function which makes a normal move
-                board.updatePiecePos(pieceAtMouse, destCoords.y, destCoords.x);
-            }
+            board.updatePiecePos(pieceAtMouse, destCoords.y, destCoords.x);
+
             //create a new bitmap for the current legal position for board.kingInCheck()
             let bmap = board.findMaskSquares(board.whiteToMove, board.occSquares);
             board.maskBitMap(bmap);
 
             board.isInCheck = board.kingInCheck();
-               
-            if (board.enPassentTaken) board.enPassentTaken = false;
         }
 
         //not part of the game logic

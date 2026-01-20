@@ -144,77 +144,67 @@ new p5(function(p5){
 
     p5.mouseReleased = async () => {
         MouseDown = false;
-        board.castled = false;
         let isLegal = false;
-        let tempEnPassentTaken = false;
         let newFEN;
+        let tempPawnMovedTwoSquares;
         let pieceMovedNtn;
 
         let destCoords = front.getMouseCoord(board.whiteToMove, p5.mouseX, p5.mouseY); // returns coord for array [0,0] [1,1] etc
 
-        if (board.isOnBoard(destCoords.y, destCoords.x) && pieceAtMouse){
-            tempEnPassentTaken = board.enPassentTaken;
-
-            if (pieceAtMouse.type === PieceType.king){
-                if(board.checkNextMoveBitmap(pieceAtMouse,destCoords.y,destCoords.x) === true){ //king moves need the bitmap before due to castling through a check
-                    if (board.isLegalKingMove(pieceAtMouse,destCoords.y,destCoords.x)) isLegal = true;
+        if (board.isOnBoard(destCoords.y, destCoords.x) && pieceAtMouse) {
+            tempPawnMovedTwoSquares = board.pawnMovedTwoSquares;
+            if (pieceAtMouse.type === PieceType.king) {
+                if (board.checkNextMoveBitmap(pieceAtMouse, destCoords.y, destCoords.x) === true) { //king moves need the bitmap before due to castling through a check
+                    if (board.isLegalKingMove(pieceAtMouse, destCoords.y, destCoords.x)) {
+                        isLegal = true;
+                    }
                 }
             } else {
-                if (board.isLegalMove(pieceAtMouse,destCoords.y,destCoords.x)){ //doesn't need the bitmap first as it can find after a move has been made whether or not it is in check
-                    if (board.checkNextMoveBitmap(pieceAtMouse,destCoords.y,destCoords.x) === true) isLegal = true;
+                if (board.isLegalMove(pieceAtMouse, destCoords.y, destCoords.x)) { //doesn't need the bitmap first as it can find after a move has been made whether or not it is in check
+                    if (board.checkNextMoveBitmap(pieceAtMouse, destCoords.y, destCoords.x) === true) {
+                        isLegal = true;
+                    }
                 }
             }
+        }
 
-
-            if (isLegal){
-                if (tempEnPassentTaken === true) {
-                    board.enPassentTaken = false;
-                }
-
-
-                let target = {"col": destCoords.x, "row": destCoords.y};
-                pieceMovedNtn = board.pieceMovedNotation(pieceAtMouse, target);
-
-                if (pieceAtMouse.type !== PieceType.pawn) board.pawnMovedTwoSquares = false;
-                //is set to false here and in board.isLegalMove
-
-
-                if (pieceAtMouse.colour === PieceType.black) board.moveCounter++; //after blacks move -> the move counter always increases
-
-
-                if (board.enPassentTaken){
-                    board.updateEnPassentMove(pieceAtMouse,destCoords.y,destCoords.x);
-                }
-                else{
-                    if (!board.castled) board.updatePiecePos(pieceAtMouse,destCoords.y,destCoords.x); //castling changes position inside the castles function
-                }
-            
-                let bmap = board.findMaskSquares(board.whiteToMove, board.occSquares);
-                board.maskBitMap(bmap); //create a new bitmap for the current legal position for board.kingInCheck()
-
-                board.isInCheck = board.kingInCheck();
-
-                newFEN = board.boardToFEN();
-
-                board.changeTurn();
-
-
-                if (board.whiteToMove) {
-                    gridData[gridData.length - 1][2] = pieceMovedNtn;
-                    pgn.update(pieceMovedNtn, newFEN, board.moveCounter - 1)
-                } else {
-                    gridData.push([board.moveCounter, '', '']);
-                    gridData[gridData.length - 1][1] = pieceMovedNtn;
-                    pgn.update(pieceMovedNtn, newFEN, board.moveCounter)
-                }
-                grid.updateConfig({
-                    data: gridData
-                }).forceRender();
-
+        if (isLegal){
+            if (tempPawnMovedTwoSquares === true){
+                board.pawnMovedTwoSquares = false;
             }
-         
-            pieceAtMouse = 0;
-        }   
+
+            let target = {"col": destCoords.x, "row": destCoords.y};
+            pieceMovedNtn = board.pieceMovedNotation(pieceAtMouse, target);
+
+            if (pieceAtMouse.colour === PieceType.black) board.moveCounter++; //after blacks move -> the move counter always increases
+
+            board.updatePiecePos(pieceAtMouse,target.row,target.col);
+
+            let bmap = board.findMaskSquares(board.whiteToMove, board.occSquares);
+            board.maskBitMap(bmap); //create a new bitmap for the current legal position for board.kingInCheck()
+
+            board.isInCheck = board.kingInCheck();
+
+            newFEN = board.boardToFEN();
+
+            board.changeTurn();
+
+            if (board.whiteToMove) {
+                gridData[gridData.length - 1][2] = pieceMovedNtn;
+                pgn.update(pieceMovedNtn, newFEN, board.moveCounter - 1)
+            } else {
+                gridData.push([board.moveCounter, '', '']);
+                gridData[gridData.length - 1][1] = pieceMovedNtn;
+                pgn.update(pieceMovedNtn, newFEN, board.moveCounter)
+            }
+            grid.updateConfig({
+                data: gridData
+            }).forceRender();
+
+        }
+
+        pieceAtMouse = 0;
+
 
         $(window).click(function () {
             // return board to original state if windows is clicked
