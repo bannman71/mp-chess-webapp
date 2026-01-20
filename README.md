@@ -6,13 +6,8 @@ packages could not be installed
 
 <h1>What's in this project?</h1>
 <p>
-    This project includes online multiplayer, local multiplayer and a board editing function
+    This project includes online multiplayer, local multiplayer and a board editing function.
     The online and local multiplayer are fully functional.
-</p>
-
-<p>
-    The board editing page is not fully functional and is work in progress.
-    You can place pieces but not remove them... Choose wisely!
 </p>
 
 <h2>Online multiplayer</h2>

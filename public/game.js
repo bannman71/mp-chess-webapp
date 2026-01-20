@@ -6,6 +6,12 @@ import { Grid } from './gridjs.mjs';
 import { FENToBoard } from './board.mjs';
 
 new p5(function(p5){
+
+    function sleep(ms){
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+
     var canv;
     var canvasDiv;
     
@@ -20,17 +26,17 @@ new p5(function(p5){
     12: 'w_bishop', 9: 'w_king', 11: 'w_knight', 10: 'w_pawn', 14: 'w_queen', 13: 'w_rook'}
     
     let IMAGES = {};
-    
-    
+
+
     // let board;
     let bitmap;
-    
+
     let legalCircles = [];
     
     let MouseDown;
     let pieceAtMouse;
     let selectedCoords;
-    
+
     let pgn;
     let moveCounterToFind;
     let PGNToFind;
@@ -63,6 +69,7 @@ new p5(function(p5){
 
         board = new Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 1, true, true, true, true, true);
         // board = new Board('8/8/8/8/8/8/8/4K1RR', 1, true, true, true, true, true);
+        // board = new Board('r3k2r/8/4n3/8/4N3/8/8/R3K2R', 1, true, true, true, true, true);
 
         board.maskBitMap(board.findMaskSquares(!board.whiteToMove, board.occSquares));
 
@@ -97,6 +104,20 @@ new p5(function(p5){
         //'rnbqkbnr/1ppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
         //rnbqkbnr/p1pppppp/1p6/4P3/8/5NP1/PPPP1PBP/RNBQK2R
         //'rnbqk1nr/p4ppp/1p1b4/8/8/5NP1/P2K1PBP/RNBQ3R'
+
+
+        grid.on('rowClick', (...args) => {
+            //get the move counter of the row clicked
+            JSON.stringify(args);
+            moveCounterToFind = $.extend({}, args[1]._cells[0].data);
+            moveCounterToFind = args[1]._cells[0].data;
+        });
+        grid.off('cellClick').on('cellClick', async (...args) => {
+            //get the PGN of the clicked cell
+            if (!Number.isInteger(args[1].data)) {
+                PGNToFind = args[1].data;
+            } else PGNToFind = null;
+        })
     } 
 
     p5.draw = () => {
@@ -104,7 +125,7 @@ new p5(function(p5){
         p5.background(front.white);
         front.drawGrid();
         front.drawCoordinates(board.whiteToMove);
-        if (displayOldPosition && oldPosFEN !== '') {
+        if (displayOldPosition && oldPosFEN !== null) {
             let pos = FENToBoard(oldPosFEN);
             front.drawAllPieces(board.whiteToMove, pos, pieceAtMouse)
         } else front.drawAllPieces(board.whiteToMove, board.occSquares, pieceAtMouse);
@@ -120,42 +141,18 @@ new p5(function(p5){
     }
 
     p5.mousePressed = () => {
-        let tempPieceAtMouse;
         pieceAtMouse = front.getPieceAtMousepos(board.whiteToMove, board.occSquares,p5.mouseX,p5.mouseY); //returns type Piece
-        if (pieceAtMouse !== tempPieceAtMouse) legalCircles = []; //empties legalcircles so that it doesn't show the squares when you click on another piece
-        tempPieceAtMouse = pieceAtMouse;
-        
-        if (pieceAtMouse){
+        legalCircles = []; //empties legalcircles so that it doesn't show the squares when you click on another piece
 
-            // var start = performance.now();
+        if (!displayOldPosition && pieceAtMouse) {
             if (board.whiteToMove === (pieceAtMouse.colour === PieceType.white)){
                 legalCircles = board.allPiecesLegalSquares(pieceAtMouse);
             }
-            // var end = performance.now();
-            // print('time taken ' + (end - start));
             MouseDown = true;
-            
         }else legalCircles = [];
-        
-        grid.on('rowClick', (...args) => {
-            //get the move counter of the row clicked
-            JSON.stringify(args);
-            moveCounterToFind = $.extend({}, args[1]._cells[0].data);
-
-            moveCounterToFind = args[1]._cells[0].data;
-            // console.log(moveCounterToFind);
-        });
-        grid.off('cellClick').on('cellClick', (...args) => {
-            //get the PGN of the clicked cell
-            if (!Number.isInteger(args[1].data)) {
-                PGNToFind = args[1].data;
-                displayOldPosition = true;
-            } else PGNToFind = '';
-
-        })
     }
 
-    p5.mouseReleased = () => {
+    p5.mouseReleased = async () => {
         MouseDown = false;
         board.castled = false;
         let isLegal = false;
@@ -186,7 +183,7 @@ new p5(function(p5){
                     board.enPassentTaken = false;
                 }
 
-                
+
                 let target = {"col": destCoords.x, "row": destCoords.y};
                 pieceMovedNtn = board.pieceMovedNotation(pieceAtMouse, target);
 
@@ -196,7 +193,7 @@ new p5(function(p5){
 
                 if (pieceAtMouse.colour === PieceType.black) board.moveCounter++; //after blacks move -> the move counter always increases
 
-                
+
                 if (board.enPassentTaken){
                     board.updateEnPassentMove(pieceAtMouse,destCoords.y,destCoords.x);
                 }
@@ -220,43 +217,42 @@ new p5(function(p5){
                 if (board.whiteToMove) {
                     gridData[gridData.length - 1][2] = pieceMovedNtn;
                     pgn.update(pieceMovedNtn, newFEN, board.moveCounter - 1)
-                  } else {
+                } else {
                     gridData.push([board.moveCounter, '', '']);
                     gridData[gridData.length - 1][1] = pieceMovedNtn;
                     pgn.update(pieceMovedNtn, newFEN, board.moveCounter)
-                  }
-                  grid.updateConfig({
-                      data: gridData
-                  }).forceRender();
-                  if (board.kingInCheck()){
+                }
+                grid.updateConfig({
+                    data: gridData
+                }).forceRender();
+
+                if (board.kingInCheck()){
                       board.isInCheck = true;
-                  } else board.isInCheck = false;
+                } else board.isInCheck = false;
       
             }
-            
-            
-
-
          
             pieceAtMouse = 0;
         }   
 
         $(window).click(function () {
-            // return board to original state after piece is put down
+            // return board to original state if windows is clicked
             displayOldPosition = false;
+            PGNToFind = null;
         });
 
         $('#game-moves-container').click(function (event) {
             event.stopPropagation();
         });
 
-        setTimeout(() => {
-            console.log(""); //don't remove this, it doesn't work without it
-            if (PGNToFind !== '') {
+        setTimeout(async() => {
+            if (PGNToFind) {
+                await sleep(5);
                 oldPosFEN = pgn.find(moveCounterToFind, PGNToFind);
-                console.log(""); //this also can't be removed - could be due to timing issue
+                displayOldPosition = true;
             }
         }, 1);
+
 
     }
 

@@ -79,7 +79,7 @@ new p5(function(p5){
             let whiteOptToSelect = '#w-' + opt + '-square';
             let blackOptToSelect = '#b-' + opt + '-square';
 
-            //reset to default style
+            //reset all to default style
             $(whiteOptToSelect).css(DEFSTYLE);
             $(blackOptToSelect).css(DEFSTYLE);
         }

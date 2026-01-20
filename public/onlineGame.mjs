@@ -7,6 +7,11 @@ import Front from './front.mjs';
 import {Grid} from './gridjs.mjs';
 
 new p5(function (p5) {
+
+    function sleep(ms){
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     // const socket = io('https://bannman71-p5chess-674rjrqr9vxh4grq-3000.preview.app.github.dev');
     const socket = io('http://localhost:3000');
 
@@ -48,6 +53,8 @@ new p5(function (p5) {
     let pgn;
     let moveCounterToFind;
     let PGNToFind;
+    //when a cell is clicked, it takes you to the position at that moment
+    //when you click on the board, the current position is displayed again
     let displayOldPosition = false;
     let oldPosFEN;
 
@@ -383,7 +390,6 @@ new p5(function (p5) {
             }
         }).render(document.getElementById("game-moves-container"));
 
-
         addElement();
         closePopup();
 
@@ -392,14 +398,10 @@ new p5(function (p5) {
 
         BLOCK_SIZE = size / 8;
 
-        // console.log('white or not');
-        // console.log(clientIsWhite);
-
         SPACING = Math.floor((BLOCK_SIZE * (1 - PIECE_SCALE)) / 2);
 
         board = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", 1, true, true, true, true, true);
 
-        // console.log(board.whiteLongCastlingRights);
         board.maskBitMap(board.findMaskSquares(!board.whiteToMove, board.occSquares));
 
         for (let im in BIN_PIECES) {
@@ -407,12 +409,6 @@ new p5(function (p5) {
         }
 
         front = new Front(p5, SPACING, BLOCK_SIZE, PIECE_SCALE, IMAGES);
-        //r3k3/1pp2ppp/8/8/1q6/3PKPP1/8/8
-        //r3k2r/5N2/8/8/8/8/PPPPPPP1/RNBQKBNR
-        //1r1k1r2/6n1/2q5/8/8/5Q2/1N6/R2K3R
-        //'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-        //rnbqkbnr/p1pppppp/1p6/4P3/8/5NP1/PPPP1PBP/RNBQK2R
-        //'rnbqk1nr/p4ppp/1p1b4/8/8/5NP1/P2K1PBP/RNBQ3R'
 
         whiteTimer = new ClientTimer(clientIsWhite, true, time, increment);
         blackTimer = new ClientTimer(clientIsWhite, false, time, increment);
@@ -423,21 +419,38 @@ new p5(function (p5) {
         whiteTimer.displayTime();
         blackTimer.displayTime();
 
-
         pgn = new PGN([], [], []);
 
+        //For displaying an old position
+        grid.on('rowClick', (...args) => {
+            //get the move counter of the row clicked
+            JSON.stringify(args);
+            moveCounterToFind = $.extend({}, args[1]._cells[0].data);
+            moveCounterToFind = args[1]._cells[0].data;
+        });
 
+        grid.off('cellClick').on('cellClick', (...args) => {
+            //get the PGN of the clicked cell
+            if (!Number.isInteger(args[1].data)) {
+                PGNToFind = args[1].data;
+            } else PGNToFind = null;
+        })
     }
 
     p5.draw = () => { //is the main p5 loop executed each frame
         p5.clear();
         p5.background(front.white);
         front.drawGrid();
-        front.drawCoordinates(clientIsWhite);    
-        if (displayOldPosition && oldPosFEN !== '') {
+        front.drawCoordinates(clientIsWhite);
+
+
+        if (displayOldPosition && oldPosFEN !== null) {
+            //draw a position earlier in the game
             let pos = FENToBoard(oldPosFEN);
             front.drawAllPieces(clientIsWhite, pos, pieceAtMouse)
+        //else just draw the position in play
         } else front.drawAllPieces(clientIsWhite, board.occSquares, pieceAtMouse);
+
         if (MouseDown) {
             front.drawPieceAtMousepos(pieceAtMouse, p5.mouseX, p5.mouseY);
             front.drawLegalSquares(clientIsWhite, legalCircles);
@@ -456,40 +469,17 @@ new p5(function (p5) {
         pieceAtMouse = front.getPieceAtMousepos(clientIsWhite, board.occSquares, p5.mouseX, p5.mouseY); //returns type Piece
         legalCircles = [];
 
+        //if not looking at an old position
         if (!displayOldPosition && pieceAtMouse) {
 
-            // var start = performance.now();
             if (board.whiteToMove && (pieceAtMouse.colour === PieceType.white) && clientIsWhite) {
                 legalCircles = board.allPiecesLegalSquares(pieceAtMouse);
             } else if (!board.whiteToMove && (pieceAtMouse.colour === PieceType.black) && !clientIsWhite) {
                 legalCircles = board.allPiecesLegalSquares(pieceAtMouse);
             }
-            // var end = performance.now();
-            // print('time taken ' + (end - start));
             MouseDown = true;
 
         } else legalCircles = [];
-
-        grid.on('rowClick', (...args) => {
-            //get the move counter of the row clicked
-            JSON.stringify(args);
-            moveCounterToFind = $.extend({}, args[1]._cells[0].data);
-
-            moveCounterToFind = args[1]._cells[0].data;
-            // console.log(moveCounterToFind);
-        });
-        grid.off('cellClick').on('cellClick', (...args) => {
-            //get the PGN of the clicked cell
-            if (!Number.isInteger(args[1].data)) {
-                console.log(args[1].data);
-                PGNToFind = args[1].data;
-                oldPosFEN =
-                displayOldPosition = true;
-            } else PGNToFind = '';
-
-        })
-
-
     }
 
     p5.mouseReleased = () => {
@@ -577,15 +567,19 @@ new p5(function (p5) {
         $(window).click(function () {
             // return board to original state
             displayOldPosition = false;
+            PGNToFind = null;
         });
 
         $('#game-moves-container').click(function (event) {
             event.stopPropagation();
         });
 
-        setTimeout(() => {
-            console.log(PGNToFind); //don't remove this, it doesn't work without it - could be timing issue
-            if (PGNToFind !== '') oldPosFEN = pgn.find(moveCounterToFind, PGNToFind);
+        setTimeout(async () => {
+            if (PGNToFind) {
+                await sleep(5);
+                oldPosFEN = pgn.find(moveCounterToFind, PGNToFind);
+                displayOldPosition = true;
+            }
         }, 1);
 
         document.getElementById('rematch-btn').onclick = () => {

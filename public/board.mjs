@@ -47,7 +47,12 @@ export function FENToBoard(FEN){
     let FENIterator = 0;
     let finalRank = false;
     let finishedIterating = false;
-    
+
+    if (!FEN){
+        return;
+    }
+
+
     while(!finishedIterating){
         if (!(/[A-Za-z]/).test(FEN[FENIterator]) && FEN[FENIterator] !== '/'){// if its a number
             col += FEN[FENIterator].charCodeAt(0) - 49;

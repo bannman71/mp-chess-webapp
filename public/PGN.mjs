@@ -10,26 +10,31 @@ export default class PGN {
         this.PGNarr.push(pieceMovedNotation);
         this.FENarr.push(FEN);
 
-        this.Data.push({"moveCounter": moveCounter, "PGNarr": this.PGNarr, "FENarr": this.FENarr});
+        this.Data.push({
+            "moveCounter": moveCounter,
+            "PGNarr": [...this.PGNarr],
+            "FENarr": [...this.FENarr]
+        });
         //every move, a fen needs to be stored,
         //it must be pushed when it is white's turn
 
     }
 
-    find(moveNum, pgnNotation) {
-
+    find(moveNum, pgnToFind) {
         for (let i = 0; i < this.Data.length; i++) {
-            for (let j = 0; j < this.PGNarr.length; j++) {
-                if (moveNum === this.Data[i].moveCounter) { //if indexed into move to find
-                    if (pgnNotation === this.Data[i].PGNarr[j]) {
-                        // console.log('hello in find');
-                        // console.log(this.Data[i]);
+            if (moveNum === this.Data[i].moveCounter) { //if indexed into move to find
+                //white's moves happen on even indexes (0, 2, 4, 6)
+                //black's happen on odd (1, 3, 5, 7)
+                //so to go straight to the indexes, do 2*moveNum - 2
+                //e.g. 2*(5) - 2 = 8
+                //so, white and black's moves can be found on indexes 8 and 9.
+                for (let j = 2*moveNum - 2; j < 2*moveNum; j++){
+                    if (this.Data[i].PGNarr[j] === pgnToFind) {
                         return this.Data[i].FENarr[j];
                     }
-                } else break;
-
+                }
             }
-
         }
     }
+
 }
