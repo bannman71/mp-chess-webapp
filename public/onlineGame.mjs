@@ -91,7 +91,6 @@ new p5(function (p5) {
         else whiteTimer = new ClientTimer(clientIsWhite, true, (data.newTimer.time / 60), data.newTimer.increment);
 
         pgn = new PGN(data.PGNarr, data.FENarr, data.pgnData)
-        // console.log(pgn);
 
         timeMoveStart = Date.now();
 
@@ -105,7 +104,6 @@ new p5(function (p5) {
 
         gridData = data.newGridData;
         //update the moves DOM with the current PGN
-
         grid.updateConfig({
             data: gridData
         }).forceRender();
@@ -298,10 +296,6 @@ new p5(function (p5) {
         BG.style.display = 'none';
     }
 
-    function yo(){
-        alert('yo');
-    }
-
     function addElement() {
         // create a new div element
         // and give it popup content
@@ -488,9 +482,6 @@ new p5(function (p5) {
         board.longCastles = false;
         let legalSideAttemptedMove = false;
         let isLegal = false;
-        let captures = false;
-
-        tempPawnMovedTwoSquares = board.tempPawnMovedTwoSquares;
 
         if (clientIsWhite === (pieceAtMouse.colour === PieceType.white)) legalSideAttemptedMove = true;
 
@@ -520,8 +511,6 @@ new p5(function (p5) {
                 timeTaken = (timeMoveEnd - timeMoveStart) / 1000;
             }
 
-            if (tempPawnMovedTwoSquares === true) board.pawnMovedTwoSquares = false;
-
             let data =
                 {
                     fCoordsX: destCoords.x,
@@ -539,10 +528,8 @@ new p5(function (p5) {
                     "FENarr": pgn.FENarr,
                     "pgnData": pgn.Data
                 };
-            // console.log(board);
 
             socket.emit('moveAttempted', data);
-            console.log('legal');
             if (board.enPassentTaken) {
                 board.updateEnPassentMove(pieceAtMouse, destCoords.y, destCoords.x);
                 board.enPassentTaken = false;
@@ -561,8 +548,6 @@ new p5(function (p5) {
         }
 
         //not part of the game logic
-
-        
 
         $(window).click(function () {
             // return board to original state

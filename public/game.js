@@ -27,15 +27,10 @@ new p5(function(p5){
     
     let IMAGES = {};
 
-
-    // let board;
-    let bitmap;
-
     let legalCircles = [];
     
     let MouseDown;
     let pieceAtMouse;
-    let selectedCoords;
 
     let pgn;
     let moveCounterToFind;
@@ -59,11 +54,6 @@ new p5(function(p5){
         PIECE_SCALE = 1;
 
         BLOCK_SIZE = WIDTH / 8;
-
-        const queryString = window.location.search;
-        const urlParameters = new URLSearchParams(queryString);
-        var time = urlParameters.get('time');
-        var increment = urlParameters.get('increment');
 
         SPACING = Math.floor((BLOCK_SIZE * (1 - PIECE_SCALE)) / 2);
 
@@ -160,9 +150,7 @@ new p5(function(p5){
         let newFEN;
         let pieceMovedNtn;
 
-        let numDefenses = 0;
-
-        let destCoords = front.getMouseCoord(board.whiteToMove, p5.mouseX, p5.mouseY); // returns coord for array [0,0] [1,1] etc     
+        let destCoords = front.getMouseCoord(board.whiteToMove, p5.mouseX, p5.mouseY); // returns coord for array [0,0] [1,1] etc
 
         if (board.isOnBoard(destCoords.y, destCoords.x) && pieceAtMouse){
             tempEnPassentTaken = board.enPassentTaken;
@@ -204,10 +192,7 @@ new p5(function(p5){
                 let bmap = board.findMaskSquares(board.whiteToMove, board.occSquares);
                 board.maskBitMap(bmap); //create a new bitmap for the current legal position for board.kingInCheck()
 
-                if (board.kingInCheck()){
-                    board.isInCheck = true;
-                    
-                } else board.isInCheck = false;
+                board.isInCheck = board.kingInCheck();
 
                 newFEN = board.boardToFEN();
 
@@ -226,10 +211,6 @@ new p5(function(p5){
                     data: gridData
                 }).forceRender();
 
-                if (board.kingInCheck()){
-                      board.isInCheck = true;
-                } else board.isInCheck = false;
-      
             }
          
             pieceAtMouse = 0;

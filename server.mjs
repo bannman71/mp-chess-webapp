@@ -134,11 +134,9 @@ io.on('connection', (socket) => {
 
           if (!gameRooms[roomCode]){
             let board = new Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 1, true, true, true, true, true)
-            let whiteTimer = new ServerTimer(matchmaking[i].time, matchmaking[j].increment);
-            let blackTimer = new ServerTimer(matchmaking[i].time, matchmaking[j].increment);
             let pgn = new PGN();
             gameRooms[roomCode] = new GameRoom(
-                roomCode, board, whiteTimer, blackTimer, pgn, [], [['1']]
+                roomCode, board, pgn, [], [['1']]
             );
           }
 
@@ -181,13 +179,8 @@ io.on('connection', (socket) => {
 
     let newGridData = data.gridData;
 
-    //object which stores the FEN string in an array for each move
-    //is be used to view a previous position from the game
-    let moveData;
-
     var piece = new Piece(data.pieceMoved.type, data.pieceMoved.row, data.pieceMoved.col, data.pieceMoved.colour);
     let board = instantiateNewBoard(data.board, data.FEN);
-
 
     //redeclare PGN class to keep its methods
     let pgn = new PGN(data.PGNarr, data.FENarr, data.pgnData);
@@ -214,13 +207,13 @@ io.on('connection', (socket) => {
 
       let target = {"row": data.fCoordsY, "col": data.fCoordsX};
       let pieceMovedNtn = board.pieceMovedNotation(piece, target);
-      // board.defendCheck();
 
       if (piece.type !== PieceType.pawn) board.pawnMovedTwoSquares = false;
 
       if (piece.colour === PieceType.black) {
         board.moveCounter++; //after blacks move -> the move counter always increases
       }
+
       if (board.enPassentTaken){
         board.updateEnPassentMove(piece, data.fCoordsY, data.fCoordsX);
         board.enPassentTaken = false;
@@ -278,7 +271,6 @@ io.on('connection', (socket) => {
 
   });
 
-  // //TODO
   socket.on('lostOnTime', (data) => {
     //end the game and display a game winning/losing card
     let winningScreen = `
